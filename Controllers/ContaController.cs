@@ -1,4 +1,5 @@
 ﻿using Exemplo_2.Context;
+using Exemplo_2.DTOs;
 using Exemplo_2.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,9 +18,20 @@ namespace Exemplo_2.Controllers
             _sqlContext = sqlContext;
         }
         [HttpGet]
-        public IEnumerable<Conta> GetContas() 
+        public IEnumerable<ContaDTO> GetContas()
         {
-            return _sqlContext.Contas.Include(x=> x.Cliente).ThenInclude(x=> x.Endereco).ToList();
+            List<Conta>  contas = _sqlContext
+                .Contas
+                .Include(x=> x.Cliente)
+                    .ThenInclude(x=> x.Endereco)
+                .ToList();
+
+            var retorno = new List<ContaDTO>();
+            foreach (var unidade_dentro_da_lista in contas)  
+            {
+                retorno.Add((ContaDTO)unidade_dentro_da_lista);
+            }
+            return retorno;
         }
 
         [HttpPost]
