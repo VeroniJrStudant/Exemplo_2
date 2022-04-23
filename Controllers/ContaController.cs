@@ -1,4 +1,5 @@
-﻿using Exemplo_2.Context;
+﻿using AutoMapper;
+using Exemplo_2.Context;
 using Exemplo_2.DTOs;
 using Exemplo_2.Models;
 using Microsoft.AspNetCore.Http;
@@ -32,6 +33,33 @@ namespace Exemplo_2.Controllers
                 retorno.Add((ContaDTO)unidade_dentro_da_lista);
             }
             return retorno;
+        }
+        
+        [HttpGet("automapper")]
+        public IEnumerable<ContaAutoMapperDTO> GetContasAutoMapper()
+        {
+            ///// GET LISTA CONTAS
+            List<Conta>  contas = _sqlContext
+                .Contas
+                .Include(x=> x.Cliente)
+                .ThenInclude(x=> x.Endereco)
+                .ToList();
+
+            
+            ////////////// 1 - CONFIGURE AUTO MAPPER 
+            var configuration = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<Conta, ContaAutoMapperDTO>();
+                cfg.CreateMap<ContaAutoMapperDTO, Conta>();
+            });
+            
+            ///////////// 2 - CREATE MAPPER
+            var mapper = configuration.CreateMapper();
+            
+            //////////// 3 - CONVERT
+            var clienteDto = mapper.Map<List<ContaAutoMapperDTO>>(contas);
+           
+            return clienteDto;
         }
 
         [HttpPost]
